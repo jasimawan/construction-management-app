@@ -10,7 +10,8 @@ import {useAppSelector} from '../../store/store';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {RootDrawerParamList} from '../../routes';
 import CategoryFormItem from '../../components/CategoryFormItem';
-import { Machine, MachineState } from '../../types';
+import {MachineCategory, MachineState} from '../../types';
+import EmptyListComponent from '../../components/EmptyListComponent';
 
 type DashboardScreenProps = {
   navigation: DrawerNavigationProp<
@@ -27,24 +28,29 @@ function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
   }, [navigation]);
 
   const keyExtractor = useCallback(
-    ({id, category}: Machine, index: number) => `${id}_${category}`,
+    ({id, category}: MachineCategory, index: number) => `${id}_${category}`,
     [],
   );
 
-  const renderItem = useCallback(({item, index}: ListRenderItemInfo<Machine>) => {
-    return (
-      <CategoryFormItem key={`${item.id}_${item.category}`} machine={item} index={index}/>
-    );
-  }, []);
+  const renderItem = useCallback(
+    ({item, index}: ListRenderItemInfo<MachineCategory>) => {
+      return (
+        <CategoryFormItem
+          key={`${item.id}_${item.category}`}
+          machineCategory={item}
+          index={index}
+        />
+      );
+    },
+    [],
+  );
 
-  if (machineState.machines.length === 0) {
+  if (machineState.machinesCategories.length === 0) {
     return (
-      <Box style={styles.emptyViewStyle}>
-        <Text>No Categories Found</Text>
-        <Button size="lg" marginTop={4} onPress={handleAddCategory}>
-          Add a Category
-        </Button>
-      </Box>
+      <EmptyListComponent
+        text="No Categories Found"
+        onClick={handleAddCategory}
+      />
     );
   }
 
@@ -52,7 +58,7 @@ function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
     <View style={styles.containerStyle}>
       <FlatList
         keyExtractor={keyExtractor}
-        data={machineState.machines}
+        data={machineState.machinesCategories}
         renderItem={renderItem}
       />
     </View>

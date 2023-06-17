@@ -1,15 +1,19 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {
   Attribute,
+  DeleteMachineRequest,
   Machine,
+  MachineCategory,
   MachineState,
+  UpdateMachineAttributeRequest,
   UpdateMachineAttributeTitleRequest,
   UpdateMachineCategoryRequest,
   UpdateOrDeleteMachineFieldRequest,
 } from '../../types';
+import shortid from 'shortid';
 
 const initialState: MachineState = {
-  machines: [],
+  machinesCategories: []
 };
 
 const getUpdatedValueBasedOnType = (
@@ -33,64 +37,100 @@ const machinesSlice = createSlice({
   name: 'machines',
   initialState,
   reducers: {
-    addNewMachine(state, action: PayloadAction<Machine>) {
-      state.machines.push(action.payload);
+    // CATEGORIES REDUCERS
+    addNewCategory(state, action: PayloadAction<MachineCategory>) {
+      state.machinesCategories.push(action.payload);
     },
-    updateMachineCategory(
+    updateCategory(
       state,
       action: PayloadAction<UpdateMachineCategoryRequest>,
     ) {
       const {index, value} = action.payload;
-      state.machines[index].category = value;
+      state.machinesCategories[index].category = value;
     },
-    addNewMachineAttribute(state, action: PayloadAction<Attribute>) {
+    addNewCategoryField(state, action: PayloadAction<Attribute>) {
       if (action.payload.machineIndex !== undefined) {
-        state.machines[action.payload.machineIndex].fields.push(action.payload);
+        const { machineIndex, label, type, id} = action.payload
+        state.machinesCategories[machineIndex].fields.push(action.payload);
+        state.machinesCategories[machineIndex].machines = state.machinesCategories[machineIndex].machines.map(item => {
+            item.attributes.push({id: shortid.generate(), fieldId: id, label, type, value: undefined})
+            return item
+        })
       }
     },
-    updateMachineAttribute(
+    updateCategoryField(
       state,
       action: PayloadAction<UpdateOrDeleteMachineFieldRequest>,
     ) {
-      const {index, fieldIndex} = action.payload;
-      if (action.payload.label) {
-        state.machines[index].fields[fieldIndex].label = action.payload.label;
-      } else if (action.payload.type) {
-        state.machines[index].fields[fieldIndex].value =
-          getUpdatedValueBasedOnType(action.payload.type);
-        state.machines[index].fields[fieldIndex].type = action.payload.type;
+      const {index, fieldIndex, fieldId} = action.payload;
+      if (action.payload.label !== undefined) {
+        state.machinesCategories[index].fields[fieldIndex].label = action.payload.label;
+        state.machinesCategories[index].machines = state.machinesCategories[index].machines.map(item => {
+            const attributeIndex = item.attributes.findIndex(item => item.fieldId === fieldId)
+            if(attributeIndex > -1){
+                item.attributes[attributeIndex].label = action.payload.label || ""
+            }
+            return item
+        })
+      } else if (action.payload.type !== undefined) {
+        state.machinesCategories[index].fields[fieldIndex].type = action.payload.type;
+        state.machinesCategories[index].machines = state.machinesCategories[index].machines.map(item => {
+            const attributeIndex = item.attributes.findIndex(item => item.fieldId === fieldId)
+            if(attributeIndex > -1){
+                item.attributes[attributeIndex].type = action.payload.type || "Text"
+                item.attributes[attributeIndex].value = undefined
+            }
+            return item
+        })
       }
     },
-    updateMachineTitleField(state, action: PayloadAction<UpdateMachineAttributeTitleRequest>){
-        const {index, fieldIndex} = action.payload
-        state.machines[index].titleFieldIndex = fieldIndex
+    updateTitleField(state, action: PayloadAction<UpdateMachineAttributeTitleRequest>){
+        const {index, fieldIndex, fieldId} = action.payload
+        state.machinesCategories[index].titleFieldIndex = fieldIndex
+        state.machinesCategories[index].titleFieldId = fieldId
     },
-    deleteMachine(state, action: PayloadAction<number>) {
-      state.machines.splice(action.payload, 1);
+    deleteCategory(state, action: PayloadAction<number>) {
+      state.machinesCategories.splice(action.payload, 1);
     },
-    deleteMachineAttribute(
+    deleteCategoryField(
       state,
       action: PayloadAction<UpdateOrDeleteMachineFieldRequest>,
     ) {
-      const machineIndex = action.payload.index;
-      if (state.machines[machineIndex].fields.length > 1) {
-        state.machines[machineIndex].titleFieldIndex = 0
-        state.machines[machineIndex].fields.splice(
-          action.payload.fieldIndex,
-          1,
-        );
+      const {index: machineIndex, fieldIndex, fieldId} = action.payload;
+      if (state.machinesCategories[machineIndex].fields.length > 1) {
+        state.machinesCategories[machineIndex].titleFieldIndex = 0
+        state.machinesCategories[machineIndex].machines = state.machinesCategories[machineIndex].machines.map(item => {
+            const newAttributes = item.attributes.filter(attribute => attribute.fieldId !== fieldId)
+            return {...item, attributes: newAttributes}
+        })
+        state.machinesCategories[machineIndex].fields.splice(fieldIndex,1);
       }
     },
+    // MACHINE REDUCERS
+    addMachine(state, action: PayloadAction<Machine>){
+        state.machinesCategories[action.payload.categoryIndex].machines.push(action.payload)
+    },
+    removeMachine(state, action: PayloadAction<DeleteMachineRequest>){
+        const {categoryIndex, machineIndex} = action.payload
+        state.machinesCategories[categoryIndex].machines.splice(machineIndex, 1)
+    },
+    updateMachineAttributeValue(state, action: PayloadAction<UpdateMachineAttributeRequest>){
+        const {categoryIndex, machineIndex, attributeIndex, text} = action.payload
+        state.machinesCategories[categoryIndex].machines[machineIndex].attributes[attributeIndex].value = text
+    }
   },
 });
 
 export const {
-  addNewMachine,
-  addNewMachineAttribute,
-  updateMachineCategory,
-  updateMachineAttribute,
-  updateMachineTitleField,
-  deleteMachine,
-  deleteMachineAttribute,
+  addNewCategory,
+  updateCategory,
+  addNewCategoryField,
+  updateCategoryField,
+  updateTitleField,
+  deleteCategory,
+  deleteCategoryField,
+  addMachine,
+  removeMachine,
+  updateMachineAttributeValue
 } = machinesSlice.actions;
 export default machinesSlice.reducer;

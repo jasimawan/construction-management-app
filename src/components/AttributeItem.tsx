@@ -1,5 +1,5 @@
 import {Button, DeleteIcon, HStack, IconButton, Input, Menu} from 'native-base';
-import React, { useCallback, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {Attribute} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
 import partial from 'lodash/partial';
@@ -7,75 +7,60 @@ import partial from 'lodash/partial';
 interface AttributeItemProps {
   index: number;
   attribute: Attribute;
-  onChangeText: (text: string, fieldIndex: number) => void;
-  onDeleteAttribute: (fieldIndex: number) => void;
-  onUpdateAttributeType: (type: string, index: number) => void
+  onChangeText: (text: string, fieldIndex: number, fieldId: string) => void;
+  onDeleteAttribute: (fieldIndex: number, fieldId: string) => void;
+  onUpdateAttributeType: (type: string, index: number, fieldId: string) => void
 }
 
-function AttributeItem({
+const AttributeItem = memo(({
   index,
   attribute,
   onChangeText,
   onDeleteAttribute,
   onUpdateAttributeType,
-}: AttributeItemProps): JSX.Element {
-  const {type, label} = attribute;
-  const [text, setText] = useState(label)
-
-  //   const getAttribute = () => {
-  //     switch(type){
-  //         case 'string':
-  //             return <Input variant="outline" placeholder={label}/>
-  //         case 'boolean':
-  //             return <Checkbox value="test" accessibilityLabel={label} />
-  //     }
-  //   }
+}: AttributeItemProps) =>  {
+  const {id, type, label} = attribute;
 
   const hanleUpdateAttributeType = useCallback((type: string) => {
-    onUpdateAttributeType(type, index)
+    onUpdateAttributeType(type, index, id)
   },[onUpdateAttributeType, index]);
 
   const handleChangeText = (text: string) => {
-    setText(text)
+    onChangeText(text, index, id)
   }
-
-  const handleUpdateStoreAttribute = useCallback(() => {
-    onChangeText(text, index)
-  },[text, index])
 
   return (
     <HStack>
       <Input
         variant="outline"
-        placeholder={text}
-        value={text !== "Field" ? text : ""}
+        placeholder="Field"
+        value={label !== "Field" ? label : ""}
         onChangeText={handleChangeText}
-        width="68%"
-        onBlur={handleUpdateStoreAttribute}
+        width="60%"
       />
       <Menu
         shouldOverlapWithTrigger={false}
         trigger={triggerProps => {
           return (
-            <Button width='25%' alignSelf="center" variant="outline" {...triggerProps}>
-              {type}
+            <Button width='32%' alignSelf="center" variant="outline" {...triggerProps}>
+              {type.toUpperCase()}
             </Button>
           );
         }}>
         {fieldTypes.map(item => (
           <Menu.Item key={item} onPress={partial(hanleUpdateAttributeType, item)}>
-            {item}
+            {item.toUpperCase()}
           </Menu.Item>
         ))}
       </Menu>
       <IconButton
-        onPress={partial(onDeleteAttribute, index)}
+        onPress={partial(onDeleteAttribute, index, id)}
         colorScheme="red"
         variant="ghost"
         icon={<DeleteIcon />}
       />
     </HStack>
   );
-}
+})
 
 export default AttributeItem;

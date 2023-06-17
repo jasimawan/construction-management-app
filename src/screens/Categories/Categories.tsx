@@ -1,12 +1,13 @@
 import React, {useCallback} from 'react';
-import {FlatList, ListRenderItemInfo, Text, View} from 'react-native';
-import {Box, Button} from 'native-base';
-import {addNewMachine} from '../../store/reducers/machines';
+import {FlatList, ListRenderItemInfo, View} from 'react-native';
+import {Button} from 'native-base';
+import {addNewCategory} from '../../store/reducers/machines';
 import styles from './Categories.style';
 import {useAppDispatch, useAppSelector} from '../../store/store';
 import CategoryFormItem from '../../components/CategoryFormItem';
 import shortId from 'shortid';
-import {Machine, MachineState} from '../../types';
+import {MachineCategory, MachineState} from '../../types';
+import EmptyListComponent from '../../components/EmptyListComponent';
 
 function Categories(): JSX.Element {
   const machineState: MachineState = useAppSelector(state => state.machines);
@@ -15,45 +16,37 @@ function Categories(): JSX.Element {
   const handleAddNew = () => {
     const fieldId = shortId.generate()
     dispatch(
-      addNewMachine({
+       addNewCategory({
         id: shortId.generate(),
         category: 'New Category',
         fields: [
-          {id: fieldId, type: 'Text', value: '', label: 'Field'},
+          {id: fieldId, type: 'Text', label: 'Field'},
         ],
-        titleFieldIndex: 0
+        titleFieldIndex: 0,
+        machines: []
       }),
     );
   };
 
-  const renderListEmptyComponent = () => {
-    return (
-      <Box style={styles.emptyViewStyle}>
-        <Text>No Categories to display</Text>
-      </Box>
-    );
-  };
+  const renderListEmptyComponent = () => <EmptyListComponent text="No Categories to display"/>
 
-  const keyExtractor = useCallback(
-    ({id, category}: Machine, index: number) => `${id}_${category}`,
-    [],
-  );
+  const keyExtractor = useCallback(({ id }: MachineCategory, index: number) => id,[]);
 
-  const renderItem = useCallback(({item, index}: ListRenderItemInfo<Machine>) => {
+  const renderItem = ({item, index}: ListRenderItemInfo<MachineCategory>) => {
     return (
       <CategoryFormItem
         key={`${item.id}_${item.category}`}
         index={index}
-        machine={item}
+        machineCategory={item}
       />
     );
-  }, []);
+  }
 
   return (
     <View style={styles.containerStyle}>
       <FlatList
         keyExtractor={keyExtractor}
-        data={machineState.machines}
+        data={machineState.machinesCategories}
         ListEmptyComponent={renderListEmptyComponent}
         renderItem={renderItem}
       />
