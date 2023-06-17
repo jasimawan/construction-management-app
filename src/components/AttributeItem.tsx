@@ -1,14 +1,26 @@
-import {Box, Button, DeleteIcon, HStack, IconButton, Input, Menu} from 'native-base';
-import React from 'react';
-import {Attribute} from '../store/reducers/machines';
+import {Button, DeleteIcon, HStack, IconButton, Input, Menu} from 'native-base';
+import React, { useCallback, useState } from 'react';
+import {Attribute} from '../types';
+import {fieldTypes} from '../constants/fieldTypes';
+import partial from 'lodash/partial';
 
 interface AttributeItemProps {
+  index: number;
   attribute: Attribute;
-  onChangeText: (text: string) => void;
+  onChangeText: (text: string, fieldIndex: number) => void;
+  onDeleteAttribute: (fieldIndex: number) => void;
+  onUpdateAttributeType: (type: string, index: number) => void
 }
 
-function AttributeItem({attribute, onChangeText}: AttributeItemProps): JSX.Element {
-  const {type, value, label} = attribute;
+function AttributeItem({
+  index,
+  attribute,
+  onChangeText,
+  onDeleteAttribute,
+  onUpdateAttributeType,
+}: AttributeItemProps): JSX.Element {
+  const {type, label} = attribute;
+  const [text, setText] = useState(label)
 
   //   const getAttribute = () => {
   //     switch(type){
@@ -19,31 +31,51 @@ function AttributeItem({attribute, onChangeText}: AttributeItemProps): JSX.Eleme
   //     }
   //   }
 
+  const hanleUpdateAttributeType = useCallback((type: string) => {
+    onUpdateAttributeType(type, index)
+  },[onUpdateAttributeType, index]);
+
+  const handleChangeText = (text: string) => {
+    setText(text)
+  }
+
+  const handleUpdateStoreAttribute = useCallback(() => {
+    onChangeText(text, index)
+  },[text, index])
+
   return (
     <HStack>
       <Input
         variant="outline"
-        placeholder={label}
-        onChangeText={onChangeText}
-        width="75%"
+        placeholder={text}
+        value={text !== "Field" ? text : ""}
+        onChangeText={handleChangeText}
+        width="68%"
+        onBlur={handleUpdateStoreAttribute}
       />
       <Menu
         shouldOverlapWithTrigger={false}
         trigger={triggerProps => {
           return (
-            <Button alignSelf="center" variant="ghost" {...triggerProps}>
+            <Button width='25%' alignSelf="center" variant="outline" {...triggerProps}>
               {type}
             </Button>
           );
         }}>
-        <Menu.Item>Text</Menu.Item>
-        <Menu.Item>Number</Menu.Item>
-        <Menu.Item>Checkbox</Menu.Item>
-        <Menu.Item>Date</Menu.Item>
+        {fieldTypes.map(item => (
+          <Menu.Item key={item} onPress={partial(hanleUpdateAttributeType, item)}>
+            {item}
+          </Menu.Item>
+        ))}
       </Menu>
-      <IconButton colorScheme="red" variant="ghost" icon={<DeleteIcon/>} />
+      <IconButton
+        onPress={partial(onDeleteAttribute, index)}
+        colorScheme="red"
+        variant="ghost"
+        icon={<DeleteIcon />}
+      />
     </HStack>
   );
 }
 
-export default AttributeItem
+export default AttributeItem;

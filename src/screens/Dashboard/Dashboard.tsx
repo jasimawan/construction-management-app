@@ -1,7 +1,6 @@
 import React, {useCallback} from 'react';
 import {FlatList, ListRenderItemInfo, Text, View} from 'react-native';
 import {Box, Button} from 'native-base';
-import {MachineState} from '../../store/reducers/machines';
 import styles from './Dashboard.style';
 import {
   CATEGORIES_SCREEN,
@@ -11,6 +10,7 @@ import {useAppSelector} from '../../store/store';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {RootDrawerParamList} from '../../routes';
 import CategoryFormItem from '../../components/CategoryFormItem';
+import { Machine, MachineState } from '../../types';
 
 type DashboardScreenProps = {
   navigation: DrawerNavigationProp<
@@ -20,24 +20,24 @@ type DashboardScreenProps = {
 };
 
 function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
-  const machines: MachineState[] = useAppSelector(state => state.machines);
+  const machineState: MachineState = useAppSelector(state => state.machines);
 
   const handleAddCategory = useCallback(() => {
     navigation.navigate(CATEGORIES_SCREEN);
   }, [navigation]);
 
   const keyExtractor = useCallback(
-    ({id}: MachineState, index: number) => `${index}_${id}`,
+    ({id, category}: Machine, index: number) => `${id}_${category}`,
     [],
   );
 
-  const renderItem = useCallback(({item}: ListRenderItemInfo<MachineState>) => {
+  const renderItem = useCallback(({item, index}: ListRenderItemInfo<Machine>) => {
     return (
-      <CategoryFormItem key={`${item.id}_${item.category}`} machine={item} />
+      <CategoryFormItem key={`${item.id}_${item.category}`} machine={item} index={index}/>
     );
   }, []);
 
-  if (machines.length === 0) {
+  if (machineState.machines.length === 0) {
     return (
       <Box style={styles.emptyViewStyle}>
         <Text>No Categories Found</Text>
@@ -52,7 +52,7 @@ function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
     <View style={styles.containerStyle}>
       <FlatList
         keyExtractor={keyExtractor}
-        data={machines}
+        data={machineState.machines}
         renderItem={renderItem}
       />
     </View>
