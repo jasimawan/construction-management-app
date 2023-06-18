@@ -8,45 +8,52 @@ import CategoryFormItem from '../../components/CategoryFormItem';
 import shortId from 'shortid';
 import {MachineCategory, MachineState} from '../../types';
 import EmptyListComponent from '../../components/EmptyListComponent';
+import DeviceInfo from 'react-native-device-info';
+
+const isTablet = DeviceInfo.isTablet();
+const isiPad = DeviceInfo.getModel() === 'iPad';
 
 function Categories(): JSX.Element {
   const machineState: MachineState = useAppSelector(state => state.machines);
   const dispatch = useAppDispatch();
 
   const handleAddNew = () => {
-    const fieldId = shortId.generate()
+    const fieldId = shortId.generate();
     dispatch(
-       addNewCategory({
+      addNewCategory({
         id: shortId.generate(),
         category: 'New Category',
-        fields: [
-          {id: fieldId, type: 'Text', label: 'Field'},
-        ],
+        fields: [{id: fieldId, type: 'Text', label: 'Field'}],
         titleFieldIndex: 0,
-        machines: []
+        titleFieldId: fieldId,
+        machines: [],
       }),
     );
   };
 
-  const renderListEmptyComponent = () => <EmptyListComponent text="No Categories to display"/>
+  const renderListEmptyComponent = () => (
+    <EmptyListComponent text="No Categories to display" />
+  );
 
-  const keyExtractor = useCallback(({ id }: MachineCategory, index: number) => id,[]);
+  const keyExtractor = useCallback(
+    ({id}: MachineCategory, index: number) => id,
+    [],
+  );
 
   const renderItem = ({item, index}: ListRenderItemInfo<MachineCategory>) => {
     return (
-      <CategoryFormItem
-        key={`${item.id}_${item.category}`}
-        index={index}
-        machineCategory={item}
-      />
+      <View style={styles.listItemStyle} key={`${item.id}_${item.category}`}>
+        <CategoryFormItem index={index} machineCategory={item} />
+      </View>
     );
-  }
+  };
 
   return (
     <View style={styles.containerStyle}>
       <FlatList
         keyExtractor={keyExtractor}
         data={machineState.machinesCategories}
+        numColumns={(isTablet || isiPad) ? 2 : 1}
         ListEmptyComponent={renderListEmptyComponent}
         renderItem={renderItem}
       />

@@ -1,14 +1,16 @@
 import {Platform, StyleSheet} from 'react-native';
+import DeviceInfo from 'react-native-device-info';
+
+const isTablet = DeviceInfo.isTablet();
+const isiPad = DeviceInfo.getModel() === 'iPad';
 
 const styles = StyleSheet.create({
   containerStyle: {
     width: '100%',
     height: '100%',
   },
-  emptyViewStyle: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8
+  listItemStyle: {
+    width: (isTablet || isiPad) ? '50%' : '100%',
   },
   buttonStyle: {
     marginHorizontal: 8,

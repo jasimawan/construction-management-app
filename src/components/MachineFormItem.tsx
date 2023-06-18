@@ -105,6 +105,7 @@ function MachineFormItem({
         );
     }
   };
+  
   return (
     <>
       <Box marginX={4}>

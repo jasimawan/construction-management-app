@@ -1,6 +1,5 @@
 import React, {useCallback} from 'react';
-import {FlatList, ListRenderItemInfo, Text, View} from 'react-native';
-import {Box, Button} from 'native-base';
+import {View} from 'react-native';
 import styles from './Dashboard.style';
 import {
   CATEGORIES_SCREEN,
@@ -9,9 +8,9 @@ import {
 import {useAppSelector} from '../../store/store';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import {RootDrawerParamList} from '../../routes';
-import CategoryFormItem from '../../components/CategoryFormItem';
-import {MachineCategory, MachineState} from '../../types';
+import {MachineState} from '../../types';
 import EmptyListComponent from '../../components/EmptyListComponent';
+import DashboardItems from '../../components/DashboardItems';
 
 type DashboardScreenProps = {
   navigation: DrawerNavigationProp<
@@ -27,24 +26,6 @@ function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
     navigation.navigate(CATEGORIES_SCREEN);
   }, [navigation]);
 
-  const keyExtractor = useCallback(
-    ({id, category}: MachineCategory, index: number) => `${id}_${category}`,
-    [],
-  );
-
-  const renderItem = useCallback(
-    ({item, index}: ListRenderItemInfo<MachineCategory>) => {
-      return (
-        <CategoryFormItem
-          key={`${item.id}_${item.category}`}
-          machineCategory={item}
-          index={index}
-        />
-      );
-    },
-    [],
-  );
-
   if (machineState.machinesCategories.length === 0) {
     return (
       <EmptyListComponent
@@ -56,11 +37,7 @@ function Dashboard({navigation}: DashboardScreenProps): JSX.Element {
 
   return (
     <View style={styles.containerStyle}>
-      <FlatList
-        keyExtractor={keyExtractor}
-        data={machineState.machinesCategories}
-        renderItem={renderItem}
-      />
+      <DashboardItems/>
     </View>
   );
 }
