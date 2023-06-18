@@ -1,5 +1,5 @@
 import {Button, HStack, Heading} from 'native-base';
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Machine, MachineState} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/store';
 import {addMachine} from '../store/reducers/machines';
@@ -22,7 +22,15 @@ function MachinesListing({
   const machineState: MachineState = useAppSelector(state => state.machines);
   const dispatch = useAppDispatch();
   const {titleFieldId, machines, fields} =
-    machineState.machinesCategories[machineCategoryIndex];
+  machineState.machinesCategories[machineCategoryIndex];
+
+  const [titleFieldIdLocal, setTitleFieldIdLocal] = useState<string>(titleFieldId || "")
+
+  useEffect(() => {
+    if(titleFieldIdLocal !== titleFieldId && titleFieldId){
+      setTitleFieldIdLocal(titleFieldId)
+    }
+  },[titleFieldId])
 
   const handleAddNewMachine = useCallback(() => {
     dispatch(
@@ -63,7 +71,7 @@ function MachinesListing({
         </View>
       );
     },
-    [],
+    [titleFieldId],
   );
 
   return (
@@ -90,7 +98,6 @@ function MachinesListing({
 const styles = StyleSheet.create({
   containerStyle: {
     width: '100%',
-    height: '100%',
   },
   listItemStyle: {
     width: isTablet || isiPad ? '50%' : '100%',

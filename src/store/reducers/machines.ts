@@ -16,23 +16,6 @@ const initialState: MachineState = {
   machinesCategories: []
 };
 
-const getUpdatedValueBasedOnType = (
-  type: 'Text' | 'Number' | 'Date' | 'Checkbox',
-) => {
-  switch (type) {
-    case 'Text':
-      return '';
-    case 'Number':
-      return 0;
-    case 'Date':
-      return undefined;
-    case 'Checkbox':
-      return false;
-    default:
-      return '';
-  }
-};
-
 const machinesSlice = createSlice({
   name: 'machines',
   initialState,
