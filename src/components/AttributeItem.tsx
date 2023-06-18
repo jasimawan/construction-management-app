@@ -1,5 +1,5 @@
 import {Button, DeleteIcon, HStack, IconButton, Input, Menu} from 'native-base';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import {Attribute} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
 import partial from 'lodash/partial';
