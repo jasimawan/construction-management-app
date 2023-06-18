@@ -81,6 +81,7 @@ function MachineFormItem({
       case 'Checkbox':
         return (
           <Checkbox
+            isChecked={typeof attribute.value === "boolean" ? attribute.value : false}
             onChange={(isSelected: boolean) =>
               hanldeUpdateAttributeValue(isSelected, index)
             }

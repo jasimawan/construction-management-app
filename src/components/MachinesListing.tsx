@@ -1,5 +1,5 @@
 import {Button, HStack, Heading} from 'native-base';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback} from 'react';
 import {Machine, MachineState} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/store';
 import {addMachine} from '../store/reducers/machines';
@@ -23,14 +23,6 @@ function MachinesListing({
   const dispatch = useAppDispatch();
   const {titleFieldId, machines, fields} =
   machineState.machinesCategories[machineCategoryIndex];
-
-  const [titleFieldIdLocal, setTitleFieldIdLocal] = useState<string>(titleFieldId || "")
-
-  useEffect(() => {
-    if(titleFieldIdLocal !== titleFieldId && titleFieldId){
-      setTitleFieldIdLocal(titleFieldId)
-    }
-  },[titleFieldId])
 
   const handleAddNewMachine = useCallback(() => {
     dispatch(
