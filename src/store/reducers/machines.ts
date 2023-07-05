@@ -21,8 +21,17 @@ const machinesSlice = createSlice({
   initialState,
   reducers: {
     // CATEGORIES REDUCERS
-    addNewCategory(state, action: PayloadAction<MachineCategory>) {
-      state.machinesCategories.push(action.payload);
+    addNewCategory(state) {
+      const fieldId = shortid.generate();
+      const category: MachineCategory = {
+        id: shortid.generate(),
+        category: 'New Category',
+        fields: [{id: fieldId, type: 'Text', label: 'Field'}],
+        titleFieldIndex: 0,
+        titleFieldId: fieldId,
+        machines: [],
+      }
+      state.machinesCategories.push(category);
     },
     updateCategory(
       state,
@@ -81,12 +90,15 @@ const machinesSlice = createSlice({
     ) {
       const {index: machineIndex, fieldIndex, fieldId} = action.payload;
       if (state.machinesCategories[machineIndex].fields.length > 1) {
-        state.machinesCategories[machineIndex].titleFieldIndex = 0
         state.machinesCategories[machineIndex].machines = state.machinesCategories[machineIndex].machines.map(item => {
             const newAttributes = item.attributes.filter(attribute => attribute.fieldId !== fieldId)
             return {...item, attributes: newAttributes}
         })
         state.machinesCategories[machineIndex].fields.splice(fieldIndex,1);
+        if(state.machinesCategories[machineIndex].titleFieldIndex === fieldIndex){
+          state.machinesCategories[machineIndex].titleFieldIndex = 0
+          state.machinesCategories[machineIndex].titleFieldId = state.machinesCategories[machineIndex].fields[0].id
+        }
       }
     },
     // MACHINE REDUCERS
@@ -98,8 +110,12 @@ const machinesSlice = createSlice({
         state.machinesCategories[categoryIndex].machines.splice(machineIndex, 1)
     },
     updateMachineAttributeValue(state, action: PayloadAction<UpdateMachineAttributeRequest>){
-        const {categoryIndex, machineIndex, attributeIndex, text} = action.payload
+      const {categoryIndex, machineIndex, attributeIndex, text} = action.payload
+      if(state.machinesCategories[categoryIndex].machines[machineIndex].attributes.length === 1){
+        state.machinesCategories[categoryIndex].machines[machineIndex].attributes[0].value = text
+      }else{
         state.machinesCategories[categoryIndex].machines[machineIndex].attributes[attributeIndex].value = text
+      }
     }
   },
 });

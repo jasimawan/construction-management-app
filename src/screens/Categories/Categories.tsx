@@ -5,7 +5,6 @@ import {addNewCategory} from '../../store/reducers/machines';
 import styles from './Categories.style';
 import {useAppDispatch, useAppSelector} from '../../store/store';
 import CategoryFormItem from '../../components/CategoryFormItem';
-import shortId from 'shortid';
 import {MachineCategory, MachineState} from '../../types';
 import EmptyListComponent from '../../components/EmptyListComponent';
 import DeviceInfo from 'react-native-device-info';
@@ -18,17 +17,7 @@ function Categories(): JSX.Element {
   const dispatch = useAppDispatch();
 
   const handleAddNew = () => {
-    const fieldId = shortId.generate();
-    dispatch(
-      addNewCategory({
-        id: shortId.generate(),
-        category: 'New Category',
-        fields: [{id: fieldId, type: 'Text', label: 'Field'}],
-        titleFieldIndex: 0,
-        titleFieldId: fieldId,
-        machines: [],
-      }),
-    );
+    dispatch(addNewCategory());
   };
 
   const renderListEmptyComponent = () => (
