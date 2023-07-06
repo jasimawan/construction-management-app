@@ -1,4 +1,4 @@
-import {Button, HStack, Heading} from 'native-base';
+import {HStack, Heading} from 'native-base';
 import React, {useCallback} from 'react';
 import {Machine, MachineState} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/store';
@@ -8,6 +8,7 @@ import EmptyListComponent from './EmptyListComponent';
 import {FlatList, ListRenderItemInfo, StyleSheet, View} from 'react-native';
 import MachineFormItem from './MachineFormItem';
 import DeviceInfo from 'react-native-device-info';
+import { useMolecules } from '@bambooapp/bamboo-molecules';
 
 const isTablet = DeviceInfo.isTablet();
 const isiPad = DeviceInfo.getModel() === 'iPad';
@@ -19,6 +20,7 @@ interface MachinesListingProps {
 function MachinesListing({
   machineCategoryIndex,
 }: MachinesListingProps): JSX.Element {
+  const { Button } = useMolecules()
   const machineState: MachineState = useAppSelector(state => state.machines);
   const dispatch = useAppDispatch();
   const {titleFieldId, machines, fields} =
@@ -72,7 +74,7 @@ function MachinesListing({
         <Heading size="md">
           {machineState.machinesCategories[machineCategoryIndex]?.category}
         </Heading>
-        <Button onPress={handleAddNewMachine} size="sm" variant="solid">
+        <Button onPress={handleAddNewMachine} size="sm" variant="contained">
           ADD NEW ITEM
         </Button>
       </HStack>

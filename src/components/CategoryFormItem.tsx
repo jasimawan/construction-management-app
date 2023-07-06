@@ -5,7 +5,6 @@ import {
   FlatList,
   HStack,
   Heading,
-  Input,
   Menu,
   Stack,
 } from 'native-base';
@@ -24,7 +23,10 @@ import {
   updateTitleField,
 } from '../store/reducers/machines';
 import shortid from 'shortid';
-import { ListRenderItemInfo } from 'react-native';
+import { ListRenderItemInfo, StyleSheet } from 'react-native';
+import { useMolecules } from '@bambooapp/bamboo-molecules'
+import CustomMenu from './Menu';
+import isUndefined from 'lodash/isUndefined';
 
 interface CategoryFormItemProps {
   machineCategory: MachineCategory;
@@ -35,12 +37,13 @@ const CategoryFormItem = memo(({
   machineCategory,
   index,
 }: CategoryFormItemProps) => {
+  const { TextInput, Button } = useMolecules()
   const {category, fields, titleFieldIndex} = machineCategory;
 
   const dispatch = useAppDispatch();
 
   const handledAddNewCategoryField = useCallback(
-    (type: string) => {
+    (type: string | number) => {
       if (
         type === 'Text' ||
         type === 'Number' ||
@@ -100,8 +103,10 @@ const CategoryFormItem = memo(({
   );
 
   const handleChangeTitleField = useCallback(
-    (fieldIndex: number, fieldId: string) => {
-      dispatch(updateTitleField({index, fieldIndex, fieldId}));
+    (fieldIndex: string | number, fieldId?: string) => {
+      if(typeof fieldIndex === "number" && !isUndefined(fieldId)){
+        dispatch(updateTitleField({index, fieldIndex, fieldId}));
+      }
     },
     [dispatch, index],
   );
@@ -131,10 +136,11 @@ const CategoryFormItem = memo(({
           <Heading size="md" ml="-1">
             {category}
           </Heading>
-          <Input
+          <TextInput
             autoFocus
-            variant="outline"
-            placeholder="Category"
+            variant="outlined"
+            placeholder="Enter Category"
+            label="Category"
             value={category}
             onChangeText={handleChangeCategory}
           />
@@ -143,25 +149,20 @@ const CategoryFormItem = memo(({
             data={fields}
             renderItem={renderItem}
           />
-          <Menu
-            shouldOverlapWithTrigger={false}
-            trigger={triggerProps => {
-              return (
-                <Button size="xs" variant="solid" {...triggerProps}>
-                  {`TITLE FIELD: ${fields[titleFieldIndex || 0].label}`}
-                </Button>
-              );
-            }}>
-            {fields.map((item: Attribute, index) => (
-              <Menu.Item
-                onPress={partial(handleChangeTitleField, index, item.id)}
-                key={`${item.id}_${item.label}`}>
-                {item.label}
-              </Menu.Item>
-            ))}
-          </Menu>
+          <CustomMenu 
+        buttonText={`TITLE FIELD: ${fields[titleFieldIndex || 0].label}`} 
+        containerStyle={styles.menuView} 
+        items={fields}
+        onMenuItemPress={handleChangeTitleField}
+      />
           <HStack>
-            <Menu
+          <CustomMenu 
+        buttonText='ADD NEW FIELD'
+        containerStyle={styles.addMenuView} 
+        items={fieldTypes}
+        onMenuItemPress={handledAddNewCategoryField}
+      />
+            {/* <Menu
               shouldOverlapWithTrigger={false}
               trigger={triggerProps => {
                 return (
@@ -177,12 +178,12 @@ const CategoryFormItem = memo(({
                   {item.toUpperCase()}
                 </Menu.Item>
               ))}
-            </Menu>
+            </Menu> */}
             <Button
               onPress={handleDeleteCategory}
-              leftIcon={<DeleteIcon />}
+              iconName='trash-can'
               size="sm"
-              variant="ghost">
+              variant="text">
               REMOVE
             </Button>
           </HStack>
@@ -190,6 +191,15 @@ const CategoryFormItem = memo(({
       </Box>
     </Box>
   );
+})
+
+const styles = StyleSheet.create({
+  menuView: {
+    flex: 1
+  },
+  addMenuView: {
+    width: '50%'
+  }
 })
 
 export default CategoryFormItem;

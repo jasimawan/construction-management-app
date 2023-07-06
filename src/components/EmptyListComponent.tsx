@@ -1,4 +1,5 @@
-import {Box, Button} from 'native-base';
+import {useMolecules} from '@bambooapp/bamboo-molecules';
+import {Box} from 'native-base';
 import React from 'react';
 import {StyleSheet, Text} from 'react-native';
 
@@ -11,11 +12,16 @@ function EmptyListComponent({
   text,
   onClick,
 }: EmptyListComponentProps): JSX.Element {
+  const {Button} = useMolecules();
   return (
     <Box style={styles.emptyViewStyle}>
       <Text>{text}</Text>
       {onClick && (
-        <Button size="lg" marginTop={4} onPress={onClick}>
+        <Button
+          style={styles.button}
+          variant="contained"
+          size="lg"
+          onPress={onClick}>
           Add a Category
         </Button>
       )}
@@ -29,7 +35,10 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    marginTop: 8
+    marginTop: 8,
+  },
+  button: {
+    marginTop: 8,
   },
 });
 

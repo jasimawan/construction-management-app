@@ -8,6 +8,7 @@ import CategoryFormItem from '../../components/CategoryFormItem';
 import {MachineCategory, MachineState} from '../../types';
 import EmptyListComponent from '../../components/EmptyListComponent';
 import DeviceInfo from 'react-native-device-info';
+import { useMolecules } from '@bambooapp/bamboo-molecules';
 
 const isTablet = DeviceInfo.isTablet();
 const isiPad = DeviceInfo.getModel() === 'iPad';
@@ -15,6 +16,7 @@ const isiPad = DeviceInfo.getModel() === 'iPad';
 function Categories(): JSX.Element {
   const machineState: MachineState = useAppSelector(state => state.machines);
   const dispatch = useAppDispatch();
+  const { Button } = useMolecules()
 
   const handleAddNew = () => {
     dispatch(addNewCategory());
@@ -46,7 +48,7 @@ function Categories(): JSX.Element {
         ListEmptyComponent={renderListEmptyComponent}
         renderItem={renderItem}
       />
-      <Button style={styles.buttonStyle} onPress={handleAddNew}>
+      <Button variant="contained" style={styles.buttonStyle} onPress={handleAddNew}>
         ADD NEW CATEGORY
       </Button>
     </View>
