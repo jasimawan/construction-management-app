@@ -1,11 +1,8 @@
 import {
   Box,
-  Button,
-  Checkbox,
-  DeleteIcon,
   Heading,
-  Input,
   Stack,
+  Checkbox
 } from 'native-base';
 import React, {useCallback, useState} from 'react';
 import {Machine, MachineAttributeData} from '../types';
@@ -16,6 +13,7 @@ import {
   removeMachine,
   updateMachineAttributeValue,
 } from '../store/reducers/machines';
+import { useMolecules } from '@bambooapp/bamboo-molecules';
 
 interface MachineFormItemProps {
   index: number;
@@ -28,6 +26,7 @@ function MachineFormItem({
   machine,
   titleFieldId,
 }: MachineFormItemProps): JSX.Element {
+  const {TextInput, Button} = useMolecules()
   const {attributes, categoryIndex} = machine;
   const [open, setOpen] = useState(false);
   const [attributeLocalIndex, setAttriubteLocalIndex] = useState<number>();
@@ -59,9 +58,9 @@ function MachineFormItem({
     switch (attribute.type) {
       case 'Text':
         return (
-          <Input
-            width="100%"
-            variant="outline"
+          <TextInput
+            variant='outlined'
+            label={attribute.label}
             placeholder={attribute.label}
             value={`${attribute.value ? attribute.value : ''}`}
             onChangeText={text => hanldeUpdateAttributeValue(text, index)}
@@ -69,9 +68,9 @@ function MachineFormItem({
         );
       case 'Number':
         return (
-          <Input
-            width="100%"
-            variant="outline"
+          <TextInput
+            variant='outlined'
+            label={attribute.label}
             placeholder={attribute.label}
             value={`${attribute.value ? attribute.value : ''}`}
             keyboardType="number-pad"
@@ -81,7 +80,6 @@ function MachineFormItem({
       case 'Checkbox':
         return (
           <Checkbox
-            isChecked={typeof attribute.value === "boolean" ? attribute.value : false}
             onChange={(isSelected: boolean) =>
               hanldeUpdateAttributeValue(isSelected, index)
             }
@@ -92,16 +90,15 @@ function MachineFormItem({
       case 'Date':
         return (
           <Button
-            colorScheme="light"
             onPress={() => {
               setAttriubteLocalIndex(index);
               setOpen(true);
             }}
             size="sm"
-            variant="outline">
+            variant="outlined">
             {attribute.value
               ? attribute.value.toLocaleString().split(',')[0]
-              : attribute.label}
+              : 'Select Date'}
           </Button>
         );
     }
@@ -129,11 +126,9 @@ function MachineFormItem({
               );
             })}
             <Button
-              colorScheme="danger"
               onPress={handleRemoveMachine}
-              leftIcon={<DeleteIcon />}
               size="sm"
-              variant="solid">
+              variant="contained-tonal">
               REMOVE
             </Button>
           </Stack>

@@ -79,6 +79,7 @@ function MachinesListing({
         </Button>
       </HStack>
       <FlatList
+        contentContainerStyle={styles.listContainerStyle}
         keyExtractor={keyExtractor}
         data={machines}
         numColumns={isTablet || isiPad ? 2 : 1}
@@ -92,10 +93,12 @@ function MachinesListing({
 const styles = StyleSheet.create({
   containerStyle: {
     width: '100%',
+    flex: 1
   },
   listItemStyle: {
     width: isTablet || isiPad ? '50%' : '100%',
   },
+  listContainerStyle: { paddingBottom: 20 }
 });
 
 export default MachinesListing;

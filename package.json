@@ -18,6 +18,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "expo-asset": "^8.9.1",
     "expo-constants": "^14.2.1",
+    "expo-file-system": "^15.4.2",
     "expo-font": "^11.1.1",
     "expo-modules-core": "^1.2.7",
     "lodash": "^4.17.21",
@@ -32,6 +33,7 @@
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "^3.21.0",
     "react-native-svg": "12.1.1",
+    "react-native-vector-icons": "^9.2.0",
     "react-redux": "^8.1.0",
     "redux-persist": "^6.0.0",
     "shortid": "^2.2.16"
@@ -45,6 +47,7 @@
     "@types/jest": "^29.2.1",
     "@types/lodash": "^4.14.195",
     "@types/react": "^18.0.24",
+    "@types/react-native-vector-icons": "^6.4.13",
     "@types/react-test-renderer": "^18.0.0",
     "@types/shortid": "^0.0.29",
     "babel-jest": "^29.2.1",

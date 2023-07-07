@@ -1,5 +1,5 @@
-import {DeleteIcon, HStack} from 'native-base';
-import React, { memo, useCallback, useRef } from 'react';
+import {IconButton, DeleteIcon, HStack} from 'native-base';
+import React, { memo, useCallback } from 'react';
 import {Attribute} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
 import partial from 'lodash/partial';
@@ -22,7 +22,7 @@ const AttributeItem = memo(({
   onDeleteAttribute,
   onUpdateAttributeType,
 }: AttributeItemProps) =>  {
-  const { TextInput, View, Button, IconButton } = useMolecules()
+  const { TextInput, View } = useMolecules()
   const {id, type, label} = attribute;
 
   const hanleUpdateAttributeType = useCallback((type: string | Number) => {
@@ -52,11 +52,9 @@ const AttributeItem = memo(({
       />
       <IconButton
         onPress={partial(onDeleteAttribute, index, id)}
-        // colorScheme="red"
-        // variant="ghost"
-        // icon={<DeleteIcon />}
-        name="icon-bitbucket"
-        type="zocial"
+        colorScheme="red"
+        variant="ghost"
+        icon={<DeleteIcon />}
       />
     </HStack>
   );

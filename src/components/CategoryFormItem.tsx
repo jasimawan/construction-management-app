@@ -1,16 +1,12 @@
 import {
   Box,
-  Button,
-  DeleteIcon,
   FlatList,
   HStack,
   Heading,
-  Menu,
   Stack,
 } from 'native-base';
 import React, {memo, useCallback, useMemo} from 'react';
 import AttributeItem from './AttributeItem';
-import partial from 'lodash/partial';
 import {Attribute, MachineCategory} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
 import {useAppDispatch} from '../store/store';
@@ -150,46 +146,28 @@ const CategoryFormItem = memo(({
             renderItem={renderItem}
           />
           <CustomMenu 
-        buttonText={`TITLE FIELD: ${fields[titleFieldIndex || 0].label}`} 
-        containerStyle={styles.menuView} 
-        items={fields}
-        onMenuItemPress={handleChangeTitleField}
-      />
+            buttonText={`TITLE FIELD: ${fields[titleFieldIndex || 0].label}`} 
+            containerStyle={styles.menuView} 
+            items={fields}
+            onMenuItemPress={handleChangeTitleField}
+          />
           <HStack>
-          <CustomMenu 
-        buttonText='ADD NEW FIELD'
-        containerStyle={styles.addMenuView} 
-        items={fieldTypes}
-        onMenuItemPress={handledAddNewCategoryField}
-      />
-            {/* <Menu
-              shouldOverlapWithTrigger={false}
-              trigger={triggerProps => {
-                return (
-                  <Button alignSelf="center" variant="ghost" {...triggerProps}>
-                    ADD NEW FIELD
-                  </Button>
-                );
-              }}>
-              {fieldTypes.map(item => (
-                <Menu.Item
-                  key={item}
-                  onPress={partial(handledAddNewCategoryField, item)}>
-                  {item.toUpperCase()}
-                </Menu.Item>
-              ))}
-            </Menu> */}
+            <CustomMenu 
+              buttonText='ADD NEW FIELD'
+              containerStyle={styles.addMenuView} 
+              items={fieldTypes}
+              onMenuItemPress={handledAddNewCategoryField}
+            />
             <Button
               onPress={handleDeleteCategory}
-              iconName='trash-can'
               size="sm"
-              variant="text">
+              variant="contained-tonal">
               REMOVE
             </Button>
           </HStack>
         </Stack>
-      </Box>
     </Box>
+  </Box>
   );
 })
 
@@ -198,7 +176,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   addMenuView: {
-    width: '50%'
+    width: '50%',
+    marginRight: 10
   }
 })
 

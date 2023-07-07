@@ -1,7 +1,6 @@
-import {useMolecules} from '@bambooapp/bamboo-molecules';
-import {Box} from 'native-base';
 import React from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {StyleSheet} from 'react-native';
+import {useMolecules} from '@bambooapp/bamboo-molecules';
 
 interface EmptyListComponentProps {
   text: string;
@@ -12,9 +11,9 @@ function EmptyListComponent({
   text,
   onClick,
 }: EmptyListComponentProps): JSX.Element {
-  const {Button} = useMolecules();
+  const {Button, Text, View} = useMolecules();
   return (
-    <Box style={styles.emptyViewStyle}>
+    <View style={styles.emptyViewStyle}>
       <Text>{text}</Text>
       {onClick && (
         <Button
@@ -25,7 +24,7 @@ function EmptyListComponent({
           Add a Category
         </Button>
       )}
-    </Box>
+    </View>
   );
 }
 

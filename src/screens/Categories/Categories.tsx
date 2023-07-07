@@ -1,6 +1,5 @@
 import React, {useCallback} from 'react';
 import {FlatList, ListRenderItemInfo, View} from 'react-native';
-import {Button} from 'native-base';
 import {addNewCategory} from '../../store/reducers/machines';
 import styles from './Categories.style';
 import {useAppDispatch, useAppSelector} from '../../store/store';
