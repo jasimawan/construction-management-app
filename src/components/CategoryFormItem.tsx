@@ -2,7 +2,7 @@ import React, {memo, useCallback, useMemo} from 'react';
 import AttributeItem from './AttributeItem';
 import {Attribute, MachineCategory, MachineState} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
-import {useAppDispatch, useAppSelector} from '../store/store';
+import {RootState, useAppDispatch, useAppSelector} from '../store/store';
 import {
   addNewCategoryField,
   deleteCategoryField,
@@ -17,6 +17,7 @@ import { ListRenderItemInfo, PixelRatio, StyleSheet } from 'react-native';
 import { useMolecules } from '@bambooapp/bamboo-molecules'
 import CustomDropdown from './CustomDropdown';
 import { updateMachinesField, deleteAttribute, addNewAttribute, deleteCategoryMachines } from '../store/reducers/machines';
+import { getTitleFieldSelector } from '../store/selectors/getTitleFieldSelector';
 
 interface CategoryFormItemProps {
   machineCategory: MachineCategory;
@@ -29,22 +30,12 @@ const CategoryFormItem = memo(({
 }: CategoryFormItemProps) => {
   const { TextInput, Button, FlatList, View, Text } = useMolecules()
   const { id ,category, fields, titleFieldId } = machineCategory;
-  const machineState: MachineState = useAppSelector(state => state.machines);
-
-  const titleField: string | undefined = useMemo(() => {
-    return fields.find(item => item.id === titleFieldId)?.label
-  }, [titleFieldId, fields])
+  const titleField = useAppSelector((state: RootState) => getTitleFieldSelector(state)(id, titleFieldId))
 
   const dispatch = useAppDispatch();
 
   const handledAddNewCategoryField = useCallback(
-    (type: string) => {
-      if (
-        type === 'Text' ||
-        type === 'Number' ||
-        type === 'Checkbox' ||
-        type === 'Date'
-      ) {
+    (type: 'Text' | 'Number' | 'Date' | 'Checkbox') => {
         dispatch(
           addNewCategoryField({
             categoryId: id,
@@ -56,46 +47,30 @@ const CategoryFormItem = memo(({
             }
           }),
         );
-        if(machineState.machines.filter(item => item.categoryId === id).length > 0){
-          dispatch(addNewAttribute({categoryId: id, attributeKey: 'Field', attributeValue: initializeValue(type)}))
-        }
-      }
+        dispatch(addNewAttribute({categoryId: id, attributeKey: 'Field', attributeValue: initializeValue(type)}))
     },
-    [dispatch, id, machineState, initializeValue],
+    [dispatch, id, initializeValue],
   );
 
   const handleDeleteCategoryField = useCallback(
     (fieldId: string, attributeKey: string) => {
       dispatch(deleteCategoryField({categoryId: id, fieldId}));
-      if(machineState.machines.filter(item => item.categoryId === id).length > 0){
-        dispatch(deleteAttribute({categoryId: id, attributeKey}))
-      }
+      dispatch(deleteAttribute({categoryId: id, attributeKey}))
     },
-    [dispatch, id, machineState],
+    [dispatch, id],
   );
 
   const handleDeleteCategory = useCallback(() => {
     dispatch(deleteCategory(index));
-    if(machineState.machines.filter(item => item.categoryId === id).length > 0){
-      dispatch(deleteCategoryMachines(id))
-    }
-  }, [dispatch, index, machineState, id]);
+    dispatch(deleteCategoryMachines(id))
+  }, [dispatch, index, id]);
 
   const handleUpdateCetgoryFieldType = useCallback(
-    (type: string, fieldId: string, attributeKey: string) => {
-      if (
-        type === 'Text' ||
-        type === 'Number' ||
-        type === 'Checkbox' ||
-        type === 'Date'
-      ) {
+    (type: 'Text' | 'Number' | 'Date' | 'Checkbox', fieldId: string, attributeKey: string) => {
         dispatch(updateCategoryField({fieldId, categoryId: id, type}));
-        if(machineState.machines.filter(item => item.categoryId === id).length > 0){
-          dispatch(updateMachinesField({categoryId: id, attributeKey, attributeValue: initializeValue(type)}))
-        }
-      }
+        dispatch(updateMachinesField({categoryId: id, attributeKey, attributeValue: initializeValue(type)}))
     },
-    [dispatch, id, machineState, initializeValue],
+    [dispatch, id, initializeValue],
   );
 
   const handleChangeCategory = useCallback(
@@ -108,11 +83,9 @@ const CategoryFormItem = memo(({
   const handleChangeCategoryField = useCallback(
     (text: string, fieldId: string, oldLabel: string) => {
       dispatch(updateCategoryField({fieldId, categoryId: id, label: text}));
-      if(machineState.machines.filter(item => item.categoryId === id).length > 0){
-        dispatch(updateMachinesField({categoryId: id, attributeKey: text, oldAttributeKey: oldLabel, attributeValue: null}))
-      }
+      dispatch(updateMachinesField({categoryId: id, attributeKey: text, oldAttributeKey: oldLabel, attributeValue: null}))
     },
-    [id, machineState],
+    [id],
   );
 
   const handleChangeTitleField = useCallback(
@@ -124,10 +97,11 @@ const CategoryFormItem = memo(({
     [dispatch, index],
   );
 
-  const renderItem = useMemo(() => ({item}: ListRenderItemInfo<Attribute>) => {
+  const renderItem = useCallback(({item: { id }}: ListRenderItemInfo<Attribute>) => {
       return (
         <AttributeItem
-          attribute={item}
+          attributeId={id}
+          categoryId={machineCategory.id}
           onChangeText={handleChangeCategoryField}
           onDeleteAttribute={handleDeleteCategoryField}
           onUpdateAttributeType={handleUpdateCetgoryFieldType}
@@ -156,7 +130,7 @@ const CategoryFormItem = memo(({
             renderItem={renderItem}
           />
           <CustomDropdown
-              buttonText={`TITLE FIELD: ${titleField}`}
+              buttonText={`TITLE FIELD: ${titleField?.label}`}
               containerStyle={styles.menuView} 
               items={fields}
               onMenuItemPress={handleChangeTitleField}

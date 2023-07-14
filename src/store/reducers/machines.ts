@@ -1,11 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {
+  AddMachineParams,
   DeleteMachineRequest,
   Machine,
   MachineState,
   UpdateMachineAttributeParams,
   UpdateMachineAttributeRequest,
 } from '../../types';
+import shortid from 'shortid';
 
 const initialState: MachineState = {
   machines: []
@@ -15,8 +17,18 @@ const machinesSlice = createSlice({
   name: 'machines',
   initialState,
   reducers: {
-    addMachine(state, action: PayloadAction<Machine>){
-        state.machines.push(action.payload)
+    addMachine(state, action: PayloadAction<AddMachineParams>){
+      const {categoryId, machineCategoryFields} = action.payload
+      const attributes: Record<string, string | boolean | number | Date | undefined> = {}
+      machineCategoryFields.forEach(item => {
+        attributes[`${item.label}_${item.id}`] = item.value
+      })
+      const newMachine = {
+        id: shortid.generate(),
+        categoryId,
+        attributes,
+      }
+      state.machines.push(newMachine)
     },
     removeMachine(state, action: PayloadAction<DeleteMachineRequest>){
         const {machineIndex} = action.payload

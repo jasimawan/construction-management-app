@@ -7,7 +7,7 @@ interface CustomMenuProps {
   items: Attribute[];
   containerStyle: ViewStyle;
   buttonText: string;
-  onMenuItemPress: (type: string, fieldId?: string) => void;
+  onMenuItemPress: (type: 'Text' | 'Number' | 'Date' | 'Checkbox', fieldId?: string) => void;
 }
 
 const CustomDropdown = ({

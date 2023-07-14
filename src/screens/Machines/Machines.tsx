@@ -9,9 +9,9 @@ type MachineScreenProps = {
 };
 
 function Machines({route}: MachineScreenProps): JSX.Element {
-  const machineCategory = route.params.machineCategory;
+  const machineCategoryId = route.params.categoryId;
   return (
-    <MachinesListing machineCategory={machineCategory}/>
+    <MachinesListing machineCategoryId={machineCategoryId}/>
   );
 }
 

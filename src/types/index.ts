@@ -64,3 +64,8 @@ export interface UpdateMachineAttributeParams {
     oldAttributeKey?: string;
     attributeValue?: string | boolean | null;
 }
+
+export interface AddMachineParams {
+    machineCategoryFields: Attribute[],
+    categoryId: string
+}

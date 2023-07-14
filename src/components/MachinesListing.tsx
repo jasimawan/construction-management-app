@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo} from 'react';
-import {Machine, MachineCategory, MachineState} from '../types';
-import {useAppDispatch, useAppSelector} from '../store/store';
+import {Machine, MachineState} from '../types';
+import {RootState, useAppDispatch, useAppSelector} from '../store/store';
 import {addMachine} from '../store/reducers/machines';
 import shortid from 'shortid';
 import EmptyListComponent from './EmptyListComponent';
@@ -8,47 +8,33 @@ import {ListRenderItemInfo, PixelRatio, StyleSheet} from 'react-native';
 import MachineFormItem from './MachineFormItem';
 import DeviceInfo from 'react-native-device-info';
 import { useMolecules } from '@bambooapp/bamboo-molecules';
+import { getCategoryByIdSelector } from '../store/selectors/categoriesSelector';
+import { getCategoryMachinesSelector } from '../store/selectors/getCategoryMachines';
 
 const isTablet = DeviceInfo.isTablet();
 const isiPad = DeviceInfo.getModel() === 'iPad';
 
 interface MachinesListingProps {
-  machineCategory: MachineCategory;
+  machineCategoryId: string;
 }
 
+const renderListEmptyComponent = () => (
+  <EmptyListComponent text="No Items to display" />
+);
+
+const keyExtractor = ({id, categoryId}: Machine, index: number) => `${id}_${categoryId}`
+
 function MachinesListing({
-  machineCategory,
+  machineCategoryId,
 }: MachinesListingProps): JSX.Element {
   const { Button, View, Text, FlatList } = useMolecules()
-  const machineState: MachineState = useAppSelector(state => state.machines);
+  const machineCategory = useAppSelector((state: RootState) => getCategoryByIdSelector(state, machineCategoryId));
+  const machines = useAppSelector((state: RootState) => getCategoryMachinesSelector(state)(machineCategoryId))
   const dispatch = useAppDispatch();
 
-  const machines = useMemo(() => machineState.machines.filter(item => item.categoryId === machineCategory.id), [machineState, machineCategory])
-
   const handleAddNewMachine = useCallback(() => {
-    const attributes: Record<string, string | boolean | number | Date | undefined> = {}
-    machineCategory.fields?.forEach(item => {
-      attributes[`${item.label}_${item.id}`] = item.value
-    })
-      dispatch(
-        addMachine({
-          id: shortid.generate(),
-          categoryId: machineCategory.id,
-          attributes,
-        }),
-      );
-  }, [dispatch, machineCategory]);
-
-  console.log("hello", machineCategory)
-
-  const renderListEmptyComponent = () => (
-    <EmptyListComponent text="No Items to display" />
-  );
-
-  const keyExtractor = useCallback(
-    ({id, categoryId}: Machine, index: number) => `${id}_${categoryId}`,
-    [],
-  );
+      dispatch(addMachine({categoryId: machineCategoryId, machineCategoryFields: machineCategory.fields}));
+  }, [dispatch, machineCategory, machineCategoryId]);
 
   const renderItem = useCallback(
     ({item, index}: ListRenderItemInfo<Machine>) => {

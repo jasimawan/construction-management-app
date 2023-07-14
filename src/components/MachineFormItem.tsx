@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import DatePicker from 'react-native-date-picker';
-import {useAppDispatch} from '../store/store';
+import {RootState, useAppDispatch, useAppSelector} from '../store/store';
 import {
   removeMachine,
   updateMachineAttributeValue,
@@ -8,6 +8,7 @@ import {
 import { useMolecules } from '@bambooapp/bamboo-molecules';
 import { Machine, MachineCategory } from '../types';
 import { PixelRatio, StyleSheet } from 'react-native';
+import { getTitleFieldSelector } from '../store/selectors/getTitleFieldSelector';
 
 interface MachineFormItemProps {
   index: number;
@@ -21,18 +22,18 @@ const MachineFormItem = ({
   machineCategory
 }: MachineFormItemProps): JSX.Element => {
   const {View, TextInput, Button, Text, Checkbox} = useMolecules()
+  const titleField = useAppSelector((state: RootState) => getTitleFieldSelector(state)(machineCategory.id, machineCategory.titleFieldId))
   const {attributes} = machine;
   const [open, setOpen] = useState(false);
   const [attributeKeyLocal, setAttriubteKeyLocal] = useState<string>();
   const dispatch = useAppDispatch();
 
   const titleAttribute = useMemo(() => {
-    const titleField = machineCategory.fields.find(item => item.id = machineCategory.titleFieldId)
     if(titleField){
       return attributes[`${titleField.label}_${titleField.id}`]
     }
     return ''
-  }, [machineCategory, attributes])
+  }, [attributes])
 
   const handleRemoveMachine = useCallback(() => {
     dispatch(removeMachine({machineIndex: index}));
@@ -51,7 +52,7 @@ const MachineFormItem = ({
     [dispatch, index],
   );
 
-  const getAttributeField = (
+  const getAttributeField = useCallback((
     attribute: string | boolean | number | Date | undefined,
     attributeKey: string,
   ) => {
@@ -102,7 +103,8 @@ const MachineFormItem = ({
           </Button>
         );
     }
-  };
+  }, [hanldeUpdateAttributeValue]);
+
   return (
     <>
       <View>

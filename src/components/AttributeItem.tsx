@@ -5,13 +5,16 @@ import {useMolecules} from '@bambooapp/bamboo-molecules';
 import {StyleSheet} from 'react-native';
 import CustomMenu from './CustomDropdown';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { RootState, useAppSelector } from '../store/store';
+import { getFieldByIdSelector } from '../store/selectors/attributeSelector';
 
 interface AttributeItemProps {
-  attribute: Attribute;
+  attributeId: string;
+  categoryId: string;
   onChangeText: (text: string, fieldId: string, oldLabel: string) => void;
   onDeleteAttribute: (fieldId: string, attributeKey: string) => void;
   onUpdateAttributeType: (
-    type: string,
+    type: 'Text' | 'Number' | 'Date' | 'Checkbox',
     fieldId: string,
     attributeKey: string,
   ) => void;
@@ -19,17 +22,19 @@ interface AttributeItemProps {
 
 const AttributeItem = memo(
   ({
-    attribute,
+    attributeId,
+    categoryId,
     onChangeText,
     onDeleteAttribute,
     onUpdateAttributeType,
   }: AttributeItemProps) => {
+    const attribute = useAppSelector((state: RootState) => getFieldByIdSelector(state)(categoryId, attributeId) as Attribute);
     const {TextInput, View} = useMolecules();
     const {id, type, label} = attribute;
 
     const hanleUpdateAttributeType = useCallback(
-      (type: string | Number) => {
-        onUpdateAttributeType(`${type}`, id, `${label}_${id}`);
+      (type: 'Text' | 'Number' | 'Date' | 'Checkbox') => {
+        onUpdateAttributeType(type, id, `${label}_${id}`);
       },
       [onUpdateAttributeType, label, id],
     );
