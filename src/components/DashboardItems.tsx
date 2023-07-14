@@ -1,27 +1,28 @@
 import React, {useCallback} from 'react';
-import {MachineCategory, MachineState} from '../types';
+import {CategoriesState, MachineCategory} from '../types';
 import {useAppSelector} from '../store/store';
-import {FlatList} from 'native-base';
 import {ListRenderItemInfo} from 'react-native';
 import MachinesListing from './MachinesListing';
+import { useMolecules } from '@bambooapp/bamboo-molecules'
 
 function DashboardItems(): JSX.Element {
-  const machineState: MachineState = useAppSelector(state => state.machines);
+  const machinecategoriesState: CategoriesState = useAppSelector(state => state.categories);
+  const { FlatList } = useMolecules()
 
   const keyExtractor = useCallback(
     ({id}: MachineCategory, index: number) => id,
     [],
   );
 
-  const renderItem = ({index}: ListRenderItemInfo<MachineCategory>) => {
-    return <MachinesListing machineCategoryIndex={index} />;
+  const renderItem = ({item}: ListRenderItemInfo<MachineCategory>) => {
+    return <MachinesListing machineCategory={item} />;
   };
 
   return (
     <FlatList
       keyExtractor={keyExtractor}
       renderItem={renderItem}
-      data={machineState.machinesCategories}
+      data={machinecategoriesState.machinesCategories}
     />
   );
 }

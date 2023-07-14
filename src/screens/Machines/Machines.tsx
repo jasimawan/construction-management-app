@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {MACHINE_SCREEN} from '../../constants/navigationScreens';
 import {RootDrawerParamList} from '../../routes';
 import {RouteProp} from '@react-navigation/native';
@@ -9,9 +9,9 @@ type MachineScreenProps = {
 };
 
 function Machines({route}: MachineScreenProps): JSX.Element {
-  const machineCategoryIndex = route.params.categoryIndex;
+  const machineCategory = route.params.machineCategory;
   return (
-    <MachinesListing machineCategoryIndex={machineCategoryIndex}/>
+    <MachinesListing machineCategory={machineCategory}/>
   );
 }
 

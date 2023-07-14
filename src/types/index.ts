@@ -1,35 +1,34 @@
 export interface Attribute {
     id: string;
-    machineIndex?: number;
     type: 'Text'|'Number'|'Date'|'Checkbox';
     label: string
-}
-
-export interface MachineAttributeData {
-    id: string;
-    fieldId: string;
-    type: 'Text'|'Number'|'Date'|'Checkbox';
-    value: string|number|Date|boolean|undefined;
-    label: string;
-}
-
-export interface Machine {
-    id: string;
-    categoryIndex: number;
-    attributes: MachineAttributeData[];
+    value?: string | boolean | number | Date
 }
 
 export interface MachineCategory {
     id: string;
     category: string;
+    titleFieldId: string;
     fields: Attribute[];
-    titleFieldIndex?: number;
-    titleFieldId?: string;
-    machines: Machine[]
+}
+
+export interface Machine {
+    id: string;
+    categoryId: string;
+    attributes: Record<string, string | boolean | number | Date | undefined>;
+}
+
+export interface CategoriesState {
+    machinesCategories: MachineCategory[];
 }
 
 export interface MachineState {
-    machinesCategories: MachineCategory[];
+    machines: Machine[];
+}
+
+export interface AddCategoryAttributeRequets{
+    categoryId: string;
+    attribute: Attribute;
 }
 
 export interface UpdateMachineCategoryRequest{
@@ -39,26 +38,29 @@ export interface UpdateMachineCategoryRequest{
 
 export interface UpdateOrDeleteMachineFieldRequest{
     fieldId: string;
-    index: number;
-    fieldIndex: number;
+    categoryId: string;
     label?: string;
     type?: 'Text'|'Number'|'Date'|'Checkbox';
 }
 
 export interface UpdateMachineAttributeTitleRequest {
     index: number;
-    fieldIndex: number;
     fieldId: string;
 }
 
 export interface DeleteMachineRequest {
-    categoryIndex: number;
     machineIndex: number;
 }
 
 export interface UpdateMachineAttributeRequest {
-    categoryIndex: number;
     machineIndex: number;
-    attributeIndex: number;
+    attributeKey: string;
     text: string|number|Date|boolean|undefined; 
+}
+
+export interface UpdateMachineAttributeParams {
+    categoryId: string;
+    attributeKey: string;
+    oldAttributeKey?: string;
+    attributeValue?: string | boolean | null;
 }

@@ -2,7 +2,6 @@ import React from 'react';
 import {Provider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import {store, persistor} from './src/store/store';
-import {NativeBaseProvider} from 'native-base';
 import { NavigationContainer } from '@react-navigation/native';
 import DrawerNavigator from './src/routes';
 import { ProvideMolecules } from '@bambooapp/bamboo-molecules';
@@ -12,11 +11,9 @@ function App(): JSX.Element {
     <ProvideMolecules>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <NativeBaseProvider>
-              <NavigationContainer>
-                <DrawerNavigator/>
-              </NavigationContainer>
-          </NativeBaseProvider>
+          <NavigationContainer>
+            <DrawerNavigator/>
+          </NavigationContainer>
         </PersistGate>
       </Provider>
     </ProvideMolecules>

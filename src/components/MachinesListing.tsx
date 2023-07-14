@@ -1,11 +1,10 @@
-import {HStack, Heading} from 'native-base';
-import React, {useCallback} from 'react';
-import {Machine, MachineState} from '../types';
+import React, {useCallback, useMemo} from 'react';
+import {Machine, MachineCategory, MachineState} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/store';
 import {addMachine} from '../store/reducers/machines';
 import shortid from 'shortid';
 import EmptyListComponent from './EmptyListComponent';
-import {FlatList, ListRenderItemInfo, StyleSheet, View} from 'react-native';
+import {ListRenderItemInfo, PixelRatio, StyleSheet} from 'react-native';
 import MachineFormItem from './MachineFormItem';
 import DeviceInfo from 'react-native-device-info';
 import { useMolecules } from '@bambooapp/bamboo-molecules';
@@ -14,40 +13,40 @@ const isTablet = DeviceInfo.isTablet();
 const isiPad = DeviceInfo.getModel() === 'iPad';
 
 interface MachinesListingProps {
-  machineCategoryIndex: number;
+  machineCategory: MachineCategory;
 }
 
 function MachinesListing({
-  machineCategoryIndex,
+  machineCategory,
 }: MachinesListingProps): JSX.Element {
-  const { Button } = useMolecules()
+  const { Button, View, Text, FlatList } = useMolecules()
   const machineState: MachineState = useAppSelector(state => state.machines);
   const dispatch = useAppDispatch();
-  const {titleFieldId, machines, fields} =
-  machineState.machinesCategories[machineCategoryIndex];
+
+  const machines = useMemo(() => machineState.machines.filter(item => item.categoryId === machineCategory.id), [machineState, machineCategory])
 
   const handleAddNewMachine = useCallback(() => {
-    dispatch(
-      addMachine({
-        id: shortid.generate(),
-        categoryIndex: machineCategoryIndex,
-        attributes: fields.map(field => ({
+    const attributes: Record<string, string | boolean | number | Date | undefined> = {}
+    machineCategory.fields?.forEach(item => {
+      attributes[`${item.label}_${item.id}`] = item.value
+    })
+      dispatch(
+        addMachine({
           id: shortid.generate(),
-          fieldId: field.id,
-          label: field.label,
-          type: field.type,
-          value: undefined,
-        })),
-      }),
-    );
-  }, [dispatch, machineCategoryIndex, fields]);
+          categoryId: machineCategory.id,
+          attributes,
+        }),
+      );
+  }, [dispatch, machineCategory]);
+
+  console.log("hello", machineCategory)
 
   const renderListEmptyComponent = () => (
     <EmptyListComponent text="No Items to display" />
   );
 
   const keyExtractor = useCallback(
-    ({id, categoryIndex}: Machine, index: number) => `${id}_${categoryIndex}`,
+    ({id, categoryId}: Machine, index: number) => `${id}_${categoryId}`,
     [],
   );
 
@@ -56,28 +55,28 @@ function MachinesListing({
       return (
         <View
           style={styles.listItemStyle}
-          key={`${item.id}_${item.categoryIndex}`}>
+          key={`${item.id}_${item.categoryId}`}>
           <MachineFormItem
             index={index}
-            titleFieldId={titleFieldId}
             machine={item}
+            machineCategory={machineCategory}
           />
         </View>
       );
     },
-    [titleFieldId],
+    [machineCategory],
   );
 
   return (
     <View style={styles.containerStyle}>
-      <HStack justifyContent="space-between" margin={2}>
-        <Heading size="md">
-          {machineState.machinesCategories[machineCategoryIndex]?.category}
-        </Heading>
+      <View style={styles.headerStyle}>
+        <Text style={styles.headingTextStyle}>
+          {machineCategory.category}
+        </Text>
         <Button onPress={handleAddNewMachine} size="sm" variant="contained">
           ADD NEW ITEM
         </Button>
-      </HStack>
+      </View>
       <FlatList
         contentContainerStyle={styles.listContainerStyle}
         keyExtractor={keyExtractor}
@@ -94,6 +93,15 @@ const styles = StyleSheet.create({
   containerStyle: {
     width: '100%',
     flex: 1
+  },
+  headerStyle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    margin: 12
+  },
+  headingTextStyle: {
+    fontWeight: 'bold',
+    fontSize: 24 / PixelRatio.getFontScale()
   },
   listItemStyle: {
     width: isTablet || isiPad ? '50%' : '100%',

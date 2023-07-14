@@ -4,9 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers } from 'redux';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 
+import categoriesReducer from './reducers/categories'
 import machineReducer from './reducers/machines';
 
 const rootReducer = combineReducers({
+  categories: categoriesReducer,
   machines: machineReducer,
 });
 

@@ -9,24 +9,25 @@ import {
   DASHBOARD_SCREEN,
   MACHINE_SCREEN,
 } from '../constants/navigationScreens';
-import {MachineState} from '../types';
+import {CategoriesState, MachineCategory} from '../types';
 import {useAppSelector} from '../store/store';
 import Machines from '../screens/Machines/Machines';
 
 export interface RootDrawerParamList extends Record<string, Record<string, unknown> | undefined> {
   [DASHBOARD_SCREEN]: undefined;
   [CATEGORIES_SCREEN]: undefined;
-  [MACHINE_SCREEN]: { categoryIndex: number };
+  [MACHINE_SCREEN]: { machineCategory: MachineCategory };
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
 const DrawerNavigator = () => {
-  const machineState: MachineState = useAppSelector(state => state.machines);
+  const categoriesState: CategoriesState = useAppSelector(state => state.categories);
+  
   return (
     <Drawer.Navigator>
       <Drawer.Screen name={DASHBOARD_SCREEN} component={Dashboard} />
-      {machineState.machinesCategories.map((machineCategory, index) => (
+      {categoriesState.machinesCategories.map((machineCategory) => (
         <Drawer.Screen
           key={`${machineCategory.id}_${machineCategory.category}`}
           name={machineCategory.id as any}
@@ -35,7 +36,12 @@ const DrawerNavigator = () => {
             drawerLabel: machineCategory.category,
             headerTitle: machineCategory.category,
           }}
-          initialParams={{ categoryIndex: index }}
+          initialParams={{ machineCategory }}
+          listeners={({ navigation }) => ({
+            focus: () => {
+              navigation.setParams({ machineCategory });
+            },
+          })}
         />
       ))}
       <Drawer.Screen name={CATEGORIES_SCREEN} component={Categories} />

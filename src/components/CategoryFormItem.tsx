@@ -1,15 +1,8 @@
-import {
-  Box,
-  FlatList,
-  HStack,
-  Heading,
-  Stack,
-} from 'native-base';
 import React, {memo, useCallback, useMemo} from 'react';
 import AttributeItem from './AttributeItem';
-import {Attribute, MachineCategory} from '../types';
+import {Attribute, MachineCategory, MachineState} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
-import {useAppDispatch} from '../store/store';
+import {useAppDispatch, useAppSelector} from '../store/store';
 import {
   addNewCategoryField,
   deleteCategoryField,
@@ -17,12 +10,13 @@ import {
   deleteCategory,
   updateCategory,
   updateTitleField,
-} from '../store/reducers/machines';
+  initializeValue
+} from '../store/reducers/categories';
 import shortid from 'shortid';
-import { ListRenderItemInfo, StyleSheet } from 'react-native';
+import { ListRenderItemInfo, PixelRatio, StyleSheet } from 'react-native';
 import { useMolecules } from '@bambooapp/bamboo-molecules'
-import CustomMenu from './Menu';
-import isUndefined from 'lodash/isUndefined';
+import CustomDropdown from './CustomDropdown';
+import { updateMachinesField, deleteAttribute, addNewAttribute, deleteCategoryMachines } from '../store/reducers/machines';
 
 interface CategoryFormItemProps {
   machineCategory: MachineCategory;
@@ -33,13 +27,18 @@ const CategoryFormItem = memo(({
   machineCategory,
   index,
 }: CategoryFormItemProps) => {
-  const { TextInput, Button } = useMolecules()
-  const {category, fields, titleFieldIndex} = machineCategory;
+  const { TextInput, Button, FlatList, View, Text } = useMolecules()
+  const { id ,category, fields, titleFieldId } = machineCategory;
+  const machineState: MachineState = useAppSelector(state => state.machines);
+
+  const titleField: string | undefined = useMemo(() => {
+    return fields.find(item => item.id === titleFieldId)?.label
+  }, [titleFieldId, fields])
 
   const dispatch = useAppDispatch();
 
   const handledAddNewCategoryField = useCallback(
-    (type: string | number) => {
+    (type: string) => {
       if (
         type === 'Text' ||
         type === 'Number' ||
@@ -48,40 +47,55 @@ const CategoryFormItem = memo(({
       ) {
         dispatch(
           addNewCategoryField({
-            id: shortid.generate(),
-            label: 'Field',
-            type,
-            machineIndex: index,
+            categoryId: id,
+            attribute: {
+              id: shortid.generate(),
+              label: 'Field',
+              value: initializeValue(type),
+              type
+            }
           }),
         );
+        if(machineState.machines.filter(item => item.categoryId === id).length > 0){
+          dispatch(addNewAttribute({categoryId: id, attributeKey: 'Field', attributeValue: initializeValue(type)}))
+        }
       }
     },
-    [dispatch, index],
+    [dispatch, id, machineState, initializeValue],
   );
 
   const handleDeleteCategoryField = useCallback(
-    (fieldIndex: number, fieldId: string) => {
-      dispatch(deleteCategoryField({index, fieldIndex, fieldId}));
+    (fieldId: string, attributeKey: string) => {
+      dispatch(deleteCategoryField({categoryId: id, fieldId}));
+      if(machineState.machines.filter(item => item.categoryId === id).length > 0){
+        dispatch(deleteAttribute({categoryId: id, attributeKey}))
+      }
     },
-    [dispatch, index],
+    [dispatch, id, machineState],
   );
 
   const handleDeleteCategory = useCallback(() => {
     dispatch(deleteCategory(index));
-  }, [dispatch, index]);
+    if(machineState.machines.filter(item => item.categoryId === id).length > 0){
+      dispatch(deleteCategoryMachines(id))
+    }
+  }, [dispatch, index, machineState, id]);
 
   const handleUpdateCetgoryFieldType = useCallback(
-    (type: string, fieldIndex: number, fieldId: string) => {
+    (type: string, fieldId: string, attributeKey: string) => {
       if (
         type === 'Text' ||
         type === 'Number' ||
         type === 'Checkbox' ||
         type === 'Date'
       ) {
-        dispatch(updateCategoryField({index, fieldIndex, type, fieldId}));
+        dispatch(updateCategoryField({fieldId, categoryId: id, type}));
+        if(machineState.machines.filter(item => item.categoryId === id).length > 0){
+          dispatch(updateMachinesField({categoryId: id, attributeKey, attributeValue: initializeValue(type)}))
+        }
       }
     },
-    [dispatch, index],
+    [dispatch, id, machineState, initializeValue],
   );
 
   const handleChangeCategory = useCallback(
@@ -92,25 +106,27 @@ const CategoryFormItem = memo(({
   );
 
   const handleChangeCategoryField = useCallback(
-    (text: string, fieldIndex: number, fieldId: string) => {
-      dispatch(updateCategoryField({index, fieldIndex, label: text, fieldId}));
+    (text: string, fieldId: string, oldLabel: string) => {
+      dispatch(updateCategoryField({fieldId, categoryId: id, label: text}));
+      if(machineState.machines.filter(item => item.categoryId === id).length > 0){
+        dispatch(updateMachinesField({categoryId: id, attributeKey: text, oldAttributeKey: oldLabel, attributeValue: null}))
+      }
     },
-    [index],
+    [id, machineState],
   );
 
   const handleChangeTitleField = useCallback(
-    (fieldIndex: string | number, fieldId?: string) => {
-      if(typeof fieldIndex === "number" && !isUndefined(fieldId)){
-        dispatch(updateTitleField({index, fieldIndex, fieldId}));
+    (type: string, fieldId?: string) => {
+      if(fieldId){
+        dispatch(updateTitleField({index, fieldId}));
       }
     },
     [dispatch, index],
   );
 
-  const renderItem = useMemo(() => ({item, index}: ListRenderItemInfo<Attribute>) => {
+  const renderItem = useMemo(() => ({item}: ListRenderItemInfo<Attribute>) => {
       return (
         <AttributeItem
-          index={index}
           attribute={item}
           onChangeText={handleChangeCategoryField}
           onDeleteAttribute={handleDeleteCategoryField}
@@ -118,21 +134,15 @@ const CategoryFormItem = memo(({
         />
       );
     },[handleChangeCategoryField, handleDeleteCategoryField, handleUpdateCetgoryFieldType])
-
+  
   return (
-    <Box marginX={4}>
-      <Box
-        rounded="lg"
-        overflow="hidden"
-        borderColor="coolGray.200"
-        borderWidth="1"
-        backgroundColor="white"
-        marginTop={4}>
-        <Stack p="4" space={3}>
-          <Heading size="md" ml="-1">
+      <View style={styles.containerStyle}>
+        <View>
+          <Text style={styles.headingStyle}>  
             {category}
-          </Heading>
+          </Text>
           <TextInput
+            style={styles.categoryInputStyle}
             autoFocus
             variant="outlined"
             placeholder="Enter Category"
@@ -145,14 +155,14 @@ const CategoryFormItem = memo(({
             data={fields}
             renderItem={renderItem}
           />
-          <CustomMenu 
-            buttonText={`TITLE FIELD: ${fields[titleFieldIndex || 0].label}`} 
-            containerStyle={styles.menuView} 
-            items={fields}
-            onMenuItemPress={handleChangeTitleField}
-          />
-          <HStack>
-            <CustomMenu 
+          <CustomDropdown
+              buttonText={`TITLE FIELD: ${titleField}`}
+              containerStyle={styles.menuView} 
+              items={fields}
+              onMenuItemPress={handleChangeTitleField}
+            />
+          <View style={styles.lastChildStyle}>
+            <CustomDropdown
               buttonText='ADD NEW FIELD'
               containerStyle={styles.addMenuView} 
               items={fieldTypes}
@@ -164,20 +174,40 @@ const CategoryFormItem = memo(({
               variant="contained-tonal">
               REMOVE
             </Button>
-          </HStack>
-        </Stack>
-    </Box>
-  </Box>
+          </View>
+        </View>
+    </View>
   );
 })
 
 const styles = StyleSheet.create({
+  containerStyle: {
+    overflow: 'hidden',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 14,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    padding: 20
+  },
+  categoryInputStyle: {
+    marginTop: 14
+  },
+  headingStyle: {
+    fontWeight: 'bold',
+    fontSize: 20 / PixelRatio.getFontScale(),
+  },
   menuView: {
-    flex: 1
+    flex: 1,
+    marginVertical: 14
   },
   addMenuView: {
     width: '50%',
     marginRight: 10
+  },
+  lastChildStyle: {
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 })
 

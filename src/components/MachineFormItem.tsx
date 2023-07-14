@@ -1,139 +1,132 @@
-import {
-  Box,
-  Heading,
-  Stack,
-  Checkbox
-} from 'native-base';
-import React, {useCallback, useState} from 'react';
-import {Machine, MachineAttributeData} from '../types';
+import React, {useCallback, useMemo, useState} from 'react';
 import DatePicker from 'react-native-date-picker';
-import {View} from 'react-native';
 import {useAppDispatch} from '../store/store';
 import {
   removeMachine,
   updateMachineAttributeValue,
 } from '../store/reducers/machines';
 import { useMolecules } from '@bambooapp/bamboo-molecules';
+import { Machine, MachineCategory } from '../types';
+import { PixelRatio, StyleSheet } from 'react-native';
 
 interface MachineFormItemProps {
   index: number;
   machine: Machine;
-  titleFieldId?: string;
+  machineCategory: MachineCategory;
 }
 
-function MachineFormItem({
+const MachineFormItem = ({
   index,
   machine,
-  titleFieldId,
-}: MachineFormItemProps): JSX.Element {
-  const {TextInput, Button} = useMolecules()
-  const {attributes, categoryIndex} = machine;
+  machineCategory
+}: MachineFormItemProps): JSX.Element => {
+  const {View, TextInput, Button, Text, Checkbox} = useMolecules()
+  const {attributes} = machine;
   const [open, setOpen] = useState(false);
-  const [attributeLocalIndex, setAttriubteLocalIndex] = useState<number>();
+  const [attributeKeyLocal, setAttriubteKeyLocal] = useState<string>();
   const dispatch = useAppDispatch();
-  const titleAttribute = attributes.find(item => item.fieldId === titleFieldId);
+
+  const titleAttribute = useMemo(() => {
+    const titleField = machineCategory.fields.find(item => item.id = machineCategory.titleFieldId)
+    if(titleField){
+      return attributes[`${titleField.label}_${titleField.id}`]
+    }
+    return ''
+  }, [machineCategory, attributes])
 
   const handleRemoveMachine = useCallback(() => {
-    dispatch(removeMachine({categoryIndex, machineIndex: index}));
-  }, [dispatch, index, categoryIndex]);
+    dispatch(removeMachine({machineIndex: index}));
+  }, [dispatch, index]);
 
   const hanldeUpdateAttributeValue = useCallback(
-    (text: string | boolean | Date, attributeIndex: number) => {
+    (text: string | boolean | Date, attributeKey: string) => {
       dispatch(
         updateMachineAttributeValue({
-          categoryIndex,
           machineIndex: index,
-          attributeIndex,
+          attributeKey,
           text,
         }),
       );
     },
-    [dispatch, categoryIndex, index],
+    [dispatch, index],
   );
 
   const getAttributeField = (
-    attribute: MachineAttributeData,
-    index: number,
+    attribute: string | boolean | number | Date | undefined,
+    attributeKey: string,
   ) => {
-    switch (attribute.type) {
-      case 'Text':
+    const key = attributeKey.split('_')[0]
+    switch (typeof attribute) {
+      case 'string':
         return (
           <TextInput
             variant='outlined'
-            label={attribute.label}
-            placeholder={attribute.label}
-            value={`${attribute.value ? attribute.value : ''}`}
-            onChangeText={text => hanldeUpdateAttributeValue(text, index)}
+            label={key}
+            placeholder={key}
+            value={`${attribute ? attribute : ''}`}
+            onChangeText={text => hanldeUpdateAttributeValue(text, attributeKey)}
           />
         );
-      case 'Number':
+      case 'number':
         return (
           <TextInput
             variant='outlined'
-            label={attribute.label}
-            placeholder={attribute.label}
-            value={`${attribute.value ? attribute.value : ''}`}
+            label={key}
+            placeholder={key}
+            value={`${attribute ? attribute : ''}`}
             keyboardType="number-pad"
-            onChangeText={text => hanldeUpdateAttributeValue(text, index)}
+            onChangeText={text => hanldeUpdateAttributeValue(text, attributeKey)}
           />
         );
-      case 'Checkbox':
+      case 'boolean':
         return (
-          <Checkbox
+          <Checkbox.Item
             onChange={(isSelected: boolean) =>
-              hanldeUpdateAttributeValue(isSelected, index)
+              hanldeUpdateAttributeValue(isSelected, attributeKey)
             }
-            value={attribute.label}>
-            {attribute.label}
-          </Checkbox>
+            label={key}
+            defaultValue={attribute} />
         );
-      case 'Date':
+      default:
         return (
           <Button
             onPress={() => {
-              setAttriubteLocalIndex(index);
+              setAttriubteKeyLocal(attributeKey);
               setOpen(true);
             }}
             size="sm"
             variant="outlined">
-            {attribute.value
-              ? attribute.value.toLocaleString().split(',')[0]
-              : 'Select Date'}
+            {attribute
+              ? attribute.toLocaleString().split(',')[0]
+              : key}
           </Button>
         );
     }
   };
-  
   return (
     <>
-      <Box marginX={4}>
-        <Box
-          rounded="lg"
-          overflow="hidden"
-          borderColor="coolGray.200"
-          borderWidth="1"
-          backgroundColor="white"
-          marginTop={4}>
-          <Stack p="4" space={3}>
-            <Heading size="md" ml="-1">
-              {titleAttribute?.value?.toString()}
-            </Heading>
-            {attributes.map((attribute: MachineAttributeData, index) => {
+      <View>
+        <View
+          style={styles.containerStyle}>
+            <Text style={styles.headingStyle}>
+              {`${titleAttribute !== undefined ?  titleAttribute : ''}`}
+            </Text>
+            {Object.keys(attributes).map((attributeKey: string) => {
               return (
-                <View key={`${attribute.id}_${attribute.label}`}>
-                  {getAttributeField(attribute, index)}
+                <View style={styles.attributeStyle} key={attributeKey}>
+                  {getAttributeField(attributes[attributeKey], attributeKey)}
                 </View>
               );
             })}
             <Button
+              style={styles.buttonStyle}
               onPress={handleRemoveMachine}
               size="sm"
               variant="contained-tonal">
               REMOVE
             </Button>
-          </Stack>
-        </Box>
-      </Box>
+          </View>
+      </View>
       <DatePicker
         modal
         mode='date'
@@ -141,7 +134,7 @@ function MachineFormItem({
         date={new Date()}
         onConfirm={date => {
           setOpen(false);
-          hanldeUpdateAttributeValue(date, attributeLocalIndex || 0);
+          hanldeUpdateAttributeValue(date, attributeKeyLocal || '');
         }}
         onCancel={() => {
           setOpen(false);
@@ -150,5 +143,27 @@ function MachineFormItem({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  containerStyle: {
+    overflow: 'hidden',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 14,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    padding: 20
+  },
+  headingStyle: {
+    fontWeight: 'bold',
+    fontSize: 20 / PixelRatio.getFontScale(),
+  },
+  attributeStyle: {
+    marginTop: 16
+  },
+  buttonStyle: {
+    marginTop: 24
+  }
+})
 
 export default MachineFormItem;

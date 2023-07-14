@@ -1,10 +1,10 @@
 import React, {useCallback} from 'react';
-import {FlatList, ListRenderItemInfo, View} from 'react-native';
-import {addNewCategory} from '../../store/reducers/machines';
+import {ListRenderItemInfo} from 'react-native';
+import { addNewCategory } from '../../store/reducers/categories';
 import styles from './Categories.style';
 import {useAppDispatch, useAppSelector} from '../../store/store';
 import CategoryFormItem from '../../components/CategoryFormItem';
-import {MachineCategory, MachineState} from '../../types';
+import {CategoriesState, MachineCategory} from '../../types';
 import EmptyListComponent from '../../components/EmptyListComponent';
 import DeviceInfo from 'react-native-device-info';
 import { useMolecules } from '@bambooapp/bamboo-molecules';
@@ -13,9 +13,9 @@ const isTablet = DeviceInfo.isTablet();
 const isiPad = DeviceInfo.getModel() === 'iPad';
 
 function Categories(): JSX.Element {
-  const machineState: MachineState = useAppSelector(state => state.machines);
+  const categoriesState: CategoriesState = useAppSelector(state => state.categories);
   const dispatch = useAppDispatch();
-  const { Button } = useMolecules()
+  const { Button, FlatList, View } = useMolecules()
 
   const handleAddNew = () => {
     dispatch(addNewCategory());
@@ -42,7 +42,7 @@ function Categories(): JSX.Element {
     <View style={styles.containerStyle}>
       <FlatList
         keyExtractor={keyExtractor}
-        data={machineState.machinesCategories}
+        data={categoriesState.machinesCategories}
         numColumns={(isTablet || isiPad) ? 2 : 1}
         ListEmptyComponent={renderListEmptyComponent}
         renderItem={renderItem}
