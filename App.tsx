@@ -4,11 +4,22 @@ import {PersistGate} from 'redux-persist/integration/react';
 import {store, persistor} from './src/store/store';
 import { NavigationContainer } from '@react-navigation/native';
 import DrawerNavigator from './src/routes';
-import { ProvideMolecules } from '@bambooapp/bamboo-molecules';
+import { ProvideMolecules, extendTheme } from '@bambooapp/bamboo-molecules';
+
+const theme = extendTheme({
+  View: {
+    backgroundColor: 'black'
+  }
+})
+
+const darkTheme = extendTheme({
+  ...theme,
+  colorMode: "dark",
+})
 
 function App(): JSX.Element {
   return (
-    <ProvideMolecules>
+    <ProvideMolecules theme={darkTheme}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <NavigationContainer>
