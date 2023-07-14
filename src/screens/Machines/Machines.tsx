@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {MACHINE_SCREEN} from '../../constants/navigationScreens';
 import {RootDrawerParamList} from '../../routes';
 import {RouteProp} from '@react-navigation/native';

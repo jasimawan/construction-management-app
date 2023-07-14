@@ -1,6 +1,6 @@
-import React, {memo, useCallback, useMemo} from 'react';
+import React, {memo, useCallback} from 'react';
 import AttributeItem from './AttributeItem';
-import {Attribute, MachineCategory, MachineState} from '../types';
+import {Attribute, MachineCategory} from '../types';
 import {fieldTypes} from '../constants/fieldTypes';
 import {RootState, useAppDispatch, useAppSelector} from '../store/store';
 import {

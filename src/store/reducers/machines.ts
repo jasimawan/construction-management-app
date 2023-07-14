@@ -2,7 +2,6 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {
   AddMachineParams,
   DeleteMachineRequest,
-  Machine,
   MachineState,
   UpdateMachineAttributeParams,
   UpdateMachineAttributeRequest,

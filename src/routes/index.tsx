@@ -9,7 +9,7 @@ import {
   DASHBOARD_SCREEN,
   MACHINE_SCREEN,
 } from '../constants/navigationScreens';
-import {CategoriesState, MachineCategory} from '../types';
+import {MachineCategory} from '../types';
 import {useAppSelector} from '../store/store';
 import Machines from '../screens/Machines/Machines';
 

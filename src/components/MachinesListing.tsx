@@ -1,8 +1,7 @@
-import React, {useCallback, useMemo} from 'react';
-import {Machine, MachineState} from '../types';
+import React, {useCallback} from 'react';
+import {Machine} from '../types';
 import {RootState, useAppDispatch, useAppSelector} from '../store/store';
 import {addMachine} from '../store/reducers/machines';
-import shortid from 'shortid';
 import EmptyListComponent from './EmptyListComponent';
 import {ListRenderItemInfo, PixelRatio, StyleSheet} from 'react-native';
 import MachineFormItem from './MachineFormItem';

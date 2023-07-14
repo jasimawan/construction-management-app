@@ -1,5 +1,5 @@
 import React from 'react';
-import {CategoriesState, MachineCategory} from '../types';
+import {MachineCategory} from '../types';
 import {useAppSelector} from '../store/store';
 import {ListRenderItemInfo} from 'react-native';
 import MachinesListing from './MachinesListing';
